@@ -1,0 +1,18 @@
+{
+  "name": "Staff Attendance Management",
+  "short_name": "Attendance",
+  "description": "Staff attendance portal with offline tracking and leave management",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#0f172a",
+  "theme_color": "#4338ca",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "192x192 512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
