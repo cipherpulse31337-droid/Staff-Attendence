@@ -201,11 +201,16 @@ export function SettingsView({
             </div>
           </div>
 
-          <div className="p-3 bg-slate-50 rounded-lg text-xs text-slate-600 flex items-start gap-2 mt-2">
-            <AlertTriangle className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
-            <p>
-              Staff checking in after <strong>{formData.lateTime}</strong> will automatically receive the <strong>Late</strong> status in today's attendance records and reports.
-            </p>
+          <div className="p-3 bg-slate-50 rounded-lg text-xs text-slate-600 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 mt-2">
+            <div className="flex items-start gap-2">
+              <AlertTriangle className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
+              <p>
+                Staff checking in after <strong>{formData.lateTime}</strong> will automatically receive the <strong>Late</strong> status in today's attendance records and reports.
+              </p>
+            </div>
+            <div className="text-xs font-medium text-indigo-700 bg-indigo-50 border border-indigo-200 px-2.5 py-1 rounded-md shrink-0">
+              Schedule: Mon–Sat (Sunday Off)
+            </div>
           </div>
         </div>
 

@@ -1,7 +1,7 @@
-import { Users, UserCheck, UserX, Clock, ArrowUpRight, Palmtree } from 'lucide-react';
+import { Users, UserCheck, UserX, Clock, ArrowUpRight, Palmtree, Sun } from 'lucide-react';
 import { Staff, AttendanceRecord, LeaveRequest, ActiveTab } from '../types';
 import { StatusBadge } from '../components/StatusBadge';
-import { getTodayDateString, formatCurrentDisplayDate, isDateInRange } from '../utils/dateUtils';
+import { getTodayDateString, formatCurrentDisplayDate, isDateInRange, isSunday } from '../utils/dateUtils';
 
 interface DashboardViewProps {
   staff: Staff[];
@@ -56,20 +56,24 @@ export function DashboardView({
       };
     }
 
+    const isSundayToday = isSunday(today);
+
     return {
       member,
       record: null,
-      status: 'Absent' as const,
+      status: isSundayToday ? ('Weekly Off' as const) : ('Absent' as const),
       checkIn: '—',
       checkOut: '—',
     };
   });
 
+  const isSundayToday = isSunday(today);
   const totalStaffCount = staff.length;
   const presentCount = todayStaffStatusList.filter((s) => s.status === 'Present').length;
   const lateCount = todayStaffStatusList.filter((s) => s.status === 'Late').length;
   const onLeaveCount = todayStaffStatusList.filter((s) => s.status === 'On Leave').length;
-  const absentCount = todayStaffStatusList.filter((s) => s.status === 'Absent').length;
+  const absentCount = isSundayToday ? 0 : todayStaffStatusList.filter((s) => s.status === 'Absent').length;
+  const weeklyOffCount = todayStaffStatusList.filter((s) => s.status === 'Weekly Off').length;
 
   return (
     <div id="dashboard-view" className="space-y-6">
@@ -109,6 +113,21 @@ export function DashboardView({
           </button>
         </div>
       </div>
+
+      {/* Sunday Holiday Notice */}
+      {isSundayToday && (
+        <div className="bg-indigo-50/70 border border-indigo-200 rounded-xl p-4 flex items-center gap-3">
+          <div className="w-9 h-9 rounded-lg bg-indigo-100 text-indigo-700 flex items-center justify-center shrink-0">
+            <Sun className="w-5 h-5" />
+          </div>
+          <div>
+            <h4 className="text-sm font-bold text-indigo-950">Sunday Off Day / Weekly Holiday</h4>
+            <p className="text-xs text-indigo-700 mt-0.5">
+              Work schedule is Monday to Saturday (08:00 – 16:00). Sunday is a scheduled off day and is never counted as absent.
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* Top 4 Summary Cards (As explicitly requested in Section 4) */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
@@ -178,27 +197,41 @@ export function DashboardView({
           </div>
         </div>
 
-        {/* Absent Today */}
+        {/* Absent Today / Off Day */}
         <div
           id="stat-card-absent-today"
-          className="bg-white rounded-xl p-5 border border-rose-100 shadow-xs transition-all hover:border-rose-200"
+          className={`bg-white rounded-xl p-5 border shadow-xs transition-all ${
+            isSundayToday ? 'border-indigo-100 hover:border-indigo-200' : 'border-rose-100 hover:border-rose-200'
+          }`}
         >
           <div className="flex items-center justify-between">
-            <span className="text-sm font-medium text-slate-600">Absent Today</span>
-            <div className="w-10 h-10 rounded-lg bg-rose-50 text-rose-600 flex items-center justify-center">
-              <UserX className="w-5 h-5" />
+            <span className="text-sm font-medium text-slate-600">
+              {isSundayToday ? 'Weekly Off' : 'Absent Today'}
+            </span>
+            <div
+              className={`w-10 h-10 rounded-lg flex items-center justify-center ${
+                isSundayToday ? 'bg-indigo-50 text-indigo-600' : 'bg-rose-50 text-rose-600'
+              }`}
+            >
+              {isSundayToday ? <Sun className="w-5 h-5" /> : <UserX className="w-5 h-5" />}
             </div>
           </div>
           <div className="mt-3">
-            <span className="text-3xl font-bold text-rose-700">{absentCount}</span>
-            {onLeaveCount > 0 && (
+            <span
+              className={`text-3xl font-bold ${
+                isSundayToday ? 'text-indigo-700' : 'text-rose-700'
+              }`}
+            >
+              {isSundayToday ? weeklyOffCount : absentCount}
+            </span>
+            {onLeaveCount > 0 && !isSundayToday && (
               <span className="ml-2 text-xs text-sky-600 font-medium">
                 ({onLeaveCount} on leave)
               </span>
             )}
           </div>
           <div className="mt-3 text-xs text-slate-500">
-            No check-in recorded for today
+            {isSundayToday ? 'Sunday scheduled holiday' : 'No check-in recorded for today'}
           </div>
         </div>
       </div>

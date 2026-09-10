@@ -1,6 +1,6 @@
 export type StaffStatus = 'Active' | 'Inactive';
 
-export type AttendanceStatus = 'Present' | 'Late' | 'Absent' | 'On Leave';
+export type AttendanceStatus = 'Present' | 'Late' | 'Absent' | 'On Leave' | 'Weekly Off';
 
 export type LeaveStatus = 'Pending' | 'Approved' | 'Rejected';
 

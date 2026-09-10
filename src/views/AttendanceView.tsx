@@ -7,7 +7,8 @@ import {
   Clock, 
   AlertCircle,
   Palmtree,
-  Users
+  Users,
+  Sun
 } from 'lucide-react';
 import { Staff, AttendanceRecord, LeaveRequest, AppSettings } from '../types';
 import { StatusBadge } from '../components/StatusBadge';
@@ -17,7 +18,8 @@ import {
   getCurrentTimeString, 
   getCurrentTime24, 
   isTimeLate, 
-  isDateInRange 
+  isDateInRange,
+  isSunday
 } from '../utils/dateUtils';
 
 interface AttendanceViewProps {
@@ -136,6 +138,10 @@ export function AttendanceView({
               <AlertCircle className="w-3.5 h-3.5 text-amber-500" />
               Late Cutoff: <strong className="text-amber-700 font-semibold">After {settings.lateTime}</strong>
             </span>
+            <span className="inline-flex items-center gap-1">
+              <Calendar className="w-3.5 h-3.5 text-indigo-500" />
+              Schedule: <strong className="text-indigo-700 font-semibold">Mon–Sat (Sunday Off)</strong>
+            </span>
           </div>
         </div>
 
@@ -154,6 +160,21 @@ export function AttendanceView({
           </div>
         </div>
       </div>
+
+      {/* Sunday Off Day Banner */}
+      {isSunday(today) && (
+        <div className="bg-indigo-50/80 border border-indigo-200 rounded-xl p-4 flex items-center gap-3">
+          <div className="w-9 h-9 rounded-lg bg-indigo-100 text-indigo-700 flex items-center justify-center shrink-0">
+            <Sun className="w-5 h-5" />
+          </div>
+          <div>
+            <h4 className="text-sm font-bold text-indigo-950">Sunday Off Day / Weekly Holiday</h4>
+            <p className="text-xs text-indigo-700 mt-0.5">
+              Working days are Monday through Saturday. Sunday is treated as an official off day and does not count as absent.
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* Staff Attendance Action Cards / Table */}
       <div className="bg-white rounded-xl border border-slate-200 shadow-xs overflow-hidden">
@@ -196,7 +217,7 @@ export function AttendanceView({
                   const hasCheckedIn = Boolean(record?.checkIn);
                   const hasCheckedOut = Boolean(record?.checkOut);
 
-                  let computedStatus = 'Absent';
+                  let computedStatus = isSunday(today) ? 'Weekly Off' : 'Absent';
                   if (onLeave) {
                     computedStatus = 'On Leave';
                   } else if (hasCheckedIn && record) {
@@ -220,7 +241,7 @@ export function AttendanceView({
                       {/* Status */}
                       <td className="py-4 px-4">
                         <StatusBadge
-                          status={computedStatus as 'Present' | 'Late' | 'Absent' | 'On Leave'}
+                          status={computedStatus as 'Present' | 'Late' | 'Absent' | 'On Leave' | 'Weekly Off'}
                         />
                       </td>
 

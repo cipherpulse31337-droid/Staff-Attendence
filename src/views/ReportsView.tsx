@@ -9,11 +9,12 @@ import {
   UserX, 
   Palmtree, 
   CalendarDays,
-  FileSpreadsheet
+  FileSpreadsheet,
+  Sun
 } from 'lucide-react';
 import { Staff, AttendanceRecord, LeaveRequest } from '../types';
 import { StatusBadge } from '../components/StatusBadge';
-import { getTodayDateString, formatReadableDate, isDateInRange } from '../utils/dateUtils';
+import { getTodayDateString, formatReadableDate, isDateInRange, isSunday } from '../utils/dateUtils';
 import { exportToCSV } from '../utils/exportUtils';
 
 interface ReportsViewProps {
@@ -62,7 +63,8 @@ export function ReportsView({
 
       const record = recordsForDate.find((r) => r.staffId === member.staffId);
 
-      let status = 'Absent';
+      const isSundayDate = isSunday(selectedDate);
+      let status = isSundayDate ? 'Weekly Off' : 'Absent';
       let checkIn = '—';
       let checkOut = '—';
 
@@ -82,19 +84,23 @@ export function ReportsView({
       };
     });
 
+    const isSundayDate = isSunday(selectedDate);
     const presentDays = rows.filter((r) => r.status === 'Present').length;
     const lateDays = rows.filter((r) => r.status === 'Late').length;
     const leaveDays = rows.filter((r) => r.status === 'On Leave').length;
-    const absentDays = rows.filter((r) => r.status === 'Absent').length;
+    const absentDays = isSundayDate ? 0 : rows.filter((r) => r.status === 'Absent').length;
+    const weeklyOffDays = rows.filter((r) => r.status === 'Weekly Off').length;
 
     return {
       date: selectedDate,
+      isSunday: isSundayDate,
       rows,
-      totalWorkingDays: 1,
+      totalWorkingDays: isSundayDate ? 0 : 1,
       presentDays,
       lateDays,
       leaveDays,
       absentDays,
+      weeklyOffDays,
     };
   }, [staffList, attendanceRecords, leaves, selectedDate]);
 
@@ -104,8 +110,10 @@ export function ReportsView({
     const monthRecords = attendanceRecords.filter((r) => r.date.startsWith(selectedMonth));
     const activeStaff = staffList.filter((s) => s.status === 'Active');
 
-    // Distinct dates recorded in this month
-    const distinctDates = Array.from(new Set(monthRecords.map((r) => r.date)));
+    // Distinct working dates recorded in this month (Monday to Saturday, Sundays excluded)
+    const distinctDates = Array.from(new Set(monthRecords.map((r) => r.date))).filter(
+      (d) => !isSunday(d)
+    );
     const totalWorkingDays = distinctDates.length || 1;
 
     // Aggregate for each staff
@@ -180,7 +188,8 @@ export function ReportsView({
 
     const presentDays = staffRecords.filter((r) => r.status === 'Present').length;
     const lateDays = staffRecords.filter((r) => r.status === 'Late').length;
-    const absentDays = staffRecords.filter((r) => r.status === 'Absent').length;
+    const absentDays = staffRecords.filter((r) => r.status === 'Absent' && !isSunday(r.date)).length;
+    const weeklyOffDays = staffRecords.filter((r) => r.status === 'Weekly Off' || isSunday(r.date)).length;
     
     // Estimate leave days
     let leaveDays = 0;
@@ -192,7 +201,7 @@ export function ReportsView({
       leaveDays += diffDays;
     });
 
-    const totalWorkingDays = staffRecords.length || (presentDays + lateDays + absentDays);
+    const totalWorkingDays = staffRecords.filter((r) => !isSunday(r.date)).length || (presentDays + lateDays + absentDays);
 
     return {
       staff: currentStaff,
@@ -201,6 +210,7 @@ export function ReportsView({
       presentDays,
       lateDays,
       absentDays,
+      weeklyOffDays,
       leaveDays,
     };
   }, [selectedStaffId, staffMap, attendanceRecords, leaves]);
@@ -456,6 +466,14 @@ export function ReportsView({
       <div className="bg-white rounded-xl border border-slate-200 shadow-xs overflow-hidden">
         {reportType === 'daily' && (
           <div className="overflow-x-auto">
+            {dailyReportData.isSunday && (
+              <div className="p-4 bg-indigo-50/80 border-b border-indigo-100 flex items-center gap-3 text-indigo-900">
+                <Sun className="w-5 h-5 text-indigo-600 shrink-0" />
+                <p className="text-xs sm:text-sm font-medium">
+                  <strong>Sunday Off Day / Holiday:</strong> {formatReadableDate(selectedDate)} is a Sunday. The company operates on a 6-day week (Monday to Saturday); Sundays are not counted as absent.
+                </p>
+              </div>
+            )}
             <table className="w-full text-left border-collapse">
               <thead>
                 <tr className="bg-slate-50/80 border-b border-slate-200 text-xs font-semibold text-slate-600 uppercase tracking-wider">

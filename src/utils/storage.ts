@@ -11,9 +11,9 @@ const STORAGE_KEYS = {
 
 export const DEFAULT_SETTINGS: AppSettings = {
   companyName: 'Apex Innovations Inc.',
-  workStartTime: '09:00',
-  workEndTime: '17:00',
-  lateTime: '09:15',
+  workStartTime: '08:00',
+  workEndTime: '16:00',
+  lateTime: '08:30',
   adminUsername: 'admin',
   adminPassword: 'password123',
 };

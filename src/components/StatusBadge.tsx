@@ -26,6 +26,10 @@ export function StatusBadge({ status, size = 'md' }: StatusBadgeProps) {
       colorClasses = 'bg-sky-50 text-sky-800 border-sky-200';
       dotColor = 'bg-sky-500';
       break;
+    case 'Weekly Off':
+      colorClasses = 'bg-indigo-50 text-indigo-800 border-indigo-200';
+      dotColor = 'bg-indigo-500';
+      break;
     case 'Active':
       colorClasses = 'bg-emerald-50 text-emerald-800 border-emerald-200';
       dotColor = 'bg-emerald-500';

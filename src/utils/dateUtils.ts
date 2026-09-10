@@ -72,3 +72,34 @@ export function isPastDate(targetDate: string): boolean {
   const today = getTodayDateString();
   return targetDate < today;
 }
+
+/**
+ * Checks if a date (YYYY-MM-DD) is Sunday (Weekly Off / Holiday)
+ */
+export function isSunday(dateString: string): boolean {
+  if (!dateString) return false;
+  const [year, month, day] = dateString.split('-').map(Number);
+  if (!year || !month || !day) return false;
+  const d = new Date(year, month - 1, day);
+  return d.getDay() === 0;
+}
+
+/**
+ * Checks if a date (YYYY-MM-DD) is a working day (Monday - Saturday)
+ */
+export function isWorkingDay(dateString: string): boolean {
+  return !isSunday(dateString);
+}
+
+/**
+ * Get readable day name (e.g. "Monday", "Sunday")
+ */
+export function getDayName(dateString: string): string {
+  if (!dateString) return '';
+  const [year, month, day] = dateString.split('-').map(Number);
+  if (!year || !month || !day) return '';
+  const d = new Date(year, month - 1, day);
+  const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+  return days[d.getDay()];
+}
+
